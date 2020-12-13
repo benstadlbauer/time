@@ -1,106 +1,100 @@
 <!DOCTYPE HTML>
 <html lang="en">
-	<head>
-	<meta charset="UTF-8">
-	<script>
-		let light = false;
-		let darkColor = "#000000";
-		let lightColor = "#ffffff";
-		const fontSizeFallback = 300;
-		let fontSizePx = 300;
-		let getStrings = [
-			function(){return (new Date()).toTimeString().split(" ")[0];},
-			function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[0] + ":" + a[1];},
-			function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[0];},
-			function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[1];},
-			function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[2];},
-		];
-		let getStrInd = 0;
+<head>
+<title>time</title>
+<meta charset="UTF-8">
+<script>
 
-		document.addEventListener("keypress", keyPress);
+const darkColor = "#000000";
+const lightColor = "#ffffff";
+const fontSizeFallbackPx = 300;
+const intervalMillisec = 200;
 
-		function load() {
-			setLight();
-			setTime();
+let light = false;
+let fontSizePx = fontSizeFallbackPx;
+let getStrings = [
+	function(){return (new Date()).toTimeString().split(" ")[0];},
+	function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[0] + ":" + a[1];},
+	function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[0];},
+	function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[1];},
+	function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[2];},
+];
+let getStrInd = 0;
+
+function load() {
+	setTime();
+	setSize();
+	setColors();
+	setInterval(setTime, intervalMillisec);
+}
+
+function setTime() {
+	let str = getStrings[getStrInd]();
+	document.getElementById("time").innerHTML = str;
+	document.title = str;
+}
+
+function setSize() {
+	document.getElementById("time").style.fontSize = fontSizePx + "px";
+}
+
+function setColors() {
+	document.body.style.background = light ? lightColor : darkColor;
+	document.getElementById("time").style.color = light ? darkColor : lightColor;
+}
+
+document.addEventListener("keypress", keyPress);
+
+function keyPress(event) {
+	switch (event.key) {
+		case " ":
+			getStrInd = ((getStrInd + 1) % getStrings.length);
+			break;
+		case "c":
+			light = !light;
+			setColors();
+			break;
+		case "+":
+			fontSizePx *= 1.2;
 			setSize();
-			setInterval(setTime, 200);
-		}
+			break;
+		case "-":
+			fontSizePx /= 1.2;
+			setSize();
+			break;
+		case "0":
+			fontSizePx = fontSizeFallbackPx;
+			setSize();
+			break;
+		case "*":
+			fontSizePx *= 1.05;
+			setSize();
+			break;
+		case "_":
+			fontSizePx /= 1.05;
+			setSize();
+			break;
+	}
+}
 
-		function keyPress(event) {
-			switch (event.key) {
-				case " ":
-					getStrInd = ((getStrInd + 1) % getStrings.length);
-					break;
-				case "c":
-					reverseColors();
-					break;
-				case "+":
-					fontSizePx *= 1.2;
-					setSize();
-					break;
-				case "-":
-					fontSizePx /= 1.2;
-					setSize();
-					break;
-				case "0":
-					fontSizePx = fontSizeFallback;
-					setSize();
-					break;
-				case "*":
-					fontSizePx *= 1.05;
-					setSize();
-					break;
-				case "_":
-					fontSizePx /= 1.05;
-					setSize();
-					break;
-
-			}
-		}
-
-
-		function setTime() {
-			document.getElementById("time").innerHTML = getStrings[getStrInd]();
-		}
-
-		function setSize() {
-			document.getElementById("time").style.fontSize = fontSizePx + "px";
-		}
-
-		function reverseColors() {
-			if (light) { setDark(); } else { setLight(); }
-		}
-
-		function setDark() {
-			document.body.style.background = darkColor;
-			document.getElementById("time").style.color = lightColor;
-			light = false;
-		}
-
-		function setLight() {
-			document.body.style.background = lightColor;
-			document.getElementById("time").style.color = darkColor;
-			light = true;
-		}
-	</script>
-	<style>
-		#time {
-			font-size: 16.0vw;
-			font-family: "Monoid";
-		}
-		.container {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			-moz-transform: translateX(-50%) translateY(-50%);
-			-webkit-transform: translateX(-50%) translateY(-50%);
-			transform: translateX(-50%) translateY(-50%);
-		}
-	</style>
-	</head>
-	<body onload="load();">
-		<div class="container">
-			<span id="time"></span>
-		</div>
-	</body>
+</script>
+<style>
+	#time {
+		font-family: monospace;
+	}
+	.container {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		-moz-transform: translateX(-50%) translateY(-50%);
+		-webkit-transform: translateX(-50%) translateY(-50%);
+		transform: translateX(-50%) translateY(-50%);
+	}
+</style>
+</head>
+<body onload="load();">
+<div class="container">
+	<span id="time"></span>
+</div>
+</body>
 </html>

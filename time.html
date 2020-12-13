@@ -9,8 +9,11 @@ const darkColor = "#000000";
 const lightColor = "#ffffff";
 const fontSizeFallbackPx = 300;
 const intervalMillisec = 200;
+const bigFontSizeFactor = 1.2;
+const smallFontSizeFactor = 1.05;
 
 let light = false;
+let help = false;
 let fontSizePx = fontSizeFallbackPx;
 let getStrings = [
 	function(){return (new Date()).toTimeString().split(" ")[0];},
@@ -39,8 +42,11 @@ function setSize() {
 }
 
 function setColors() {
-	document.body.style.background = light ? lightColor : darkColor;
-	document.getElementById("time").style.color = light ? darkColor : lightColor;
+	const txt = light ? darkColor : lightColor;
+	const back = light ? lightColor : darkColor;
+	document.body.style.background = back;
+	document.body.style.color = txt;
+	document.getElementById("time").style.color = txt;
 }
 
 document.addEventListener("keypress", keyPress);
@@ -55,11 +61,11 @@ function keyPress(event) {
 			setColors();
 			break;
 		case "+":
-			fontSizePx *= 1.2;
+			fontSizePx *= bigFontSizeFactor;
 			setSize();
 			break;
 		case "-":
-			fontSizePx /= 1.2;
+			fontSizePx /= bigFontSizeFactor;
 			setSize();
 			break;
 		case "0":
@@ -67,19 +73,30 @@ function keyPress(event) {
 			setSize();
 			break;
 		case "*":
-			fontSizePx *= 1.05;
+			fontSizePx *= smallFontSizeFactor;
 			setSize();
 			break;
 		case "_":
-			fontSizePx /= 1.05;
+			fontSizePx /= smallFontSizeFactor;
 			setSize();
 			break;
+		case "h":
+			toggleHelp();
+			break;
+	}
+}
+
+function toggleHelp() {
+	help = !help;
+	let elements = document.getElementsByClassName("help");
+	for (let element of elements) {
+		element.style.display = help ? "block" : "none";
 	}
 }
 
 </script>
 <style>
-	#time {
+	body {
 		font-family: monospace;
 	}
 	.container {
@@ -94,7 +111,9 @@ function keyPress(event) {
 </head>
 <body onload="load();">
 <div class="container">
+	<span class="help" style="display:none"><b>Space</b> sweeps through clock-displays | <b>c</b> toggles the colors | <b>+</b> increases size | <b>-</b> decreases size | <b>0</b> resets font size</span>
 	<span id="time"></span>
+	<span class="help" style="display:none"><a href="https://github.com/benstadlbauer/time">Repository on GitHub</a></span>
 </div>
 </body>
 </html>

@@ -10,7 +10,6 @@ const lightColor = "#ffffff";
 const fontSizeFallbackPx = 300;
 const intervalMillisec = 200;
 const bigFontSizeFactor = 1.2;
-const smallFontSizeFactor = 1.05;
 
 let light = false;
 let help = false;
@@ -70,14 +69,6 @@ function keyPress(event) {
 			break;
 		case "0":
 			fontSizePx = fontSizeFallbackPx;
-			setSize();
-			break;
-		case "*":
-			fontSizePx *= smallFontSizeFactor;
-			setSize();
-			break;
-		case "_":
-			fontSizePx /= smallFontSizeFactor;
 			setSize();
 			break;
 		case "h":

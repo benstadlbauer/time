@@ -5,14 +5,26 @@
 <meta charset="UTF-8">
 <script>
 
-const darkColor = "#000000";
-const lightColor = "#ffffff";
 const fontSizeFallbackPx = 300;
-const intervalMillisec = 200;
-const bigFontSizeFactor = 1.2;
+const intervalMillisec = 100;
+const fontSizeFactor = 1.2;
+const rgbSedecimalRe = /[\da-fA-F]{6}/
 
-let light = false;
+let schemes = {
+	index: 0,
+	colors: [
+		{text: "#ffffff", background: "#000000"},
+		{text: "#a0a0a0", background: "#101010"},
+		{text: "#ff0000", background: "#000000"},
+		{text: "#000000", background: "#ffffff"},
+		{text: "#101010", background: "#a0a0a0"},
+		{text: "#000000", background: "#ff0000"},
+	],
+};
+
+let color = schemes.colors[schemes.index];
 let help = false;
+let settings = false;
 let fontSizePx = fontSizeFallbackPx;
 let getStrings = [
 	function(){return (new Date()).toTimeString().split(" ")[0];},
@@ -21,18 +33,31 @@ let getStrings = [
 	function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[1];},
 	function(){const a = (new Date()).toTimeString().split(" ")[0].split(":"); return a[2];},
 ];
+
 let getStrInd = 0;
+let darkColorInput;
+let lightColorInput;
 
 function load() {
+	document.addEventListener("keydown", handleHotKey);
+	let inputs = document.getElementsByTagName("input")
+	for (let input of inputs) {
+		input.addEventListener("keydown", e => e.stopPropagation());
+		input.addEventListener("keyup", e => checkConvertion(e));
+		input.addEventListener("paste", e => checkConvertion(e));
+	}
+
 	setTime();
 	setSize();
 	setColors();
+	setColorsToInput();
 	setInterval(setTime, intervalMillisec);
 }
 
 function setTime() {
 	let str = getStrings[getStrInd]();
 	document.getElementById("time").innerHTML = str;
+	document.getElementById("time-preview").innerHTML = str;
 	document.title = str;
 }
 
@@ -41,30 +66,35 @@ function setSize() {
 }
 
 function setColors() {
-	const txt = light ? darkColor : lightColor;
-	const back = light ? lightColor : darkColor;
-	document.body.style.background = back;
-	document.body.style.color = txt;
-	document.getElementById("time").style.color = txt;
+	document.body.style.background = color.background;
+	document.body.style.color = color.text;
+	document.getElementById("time").style.color = color.text;
 }
 
-document.addEventListener("keypress", keyPress);
-
-function keyPress(event) {
+function handleHotKey(event) {
+	if (event.repeat && !(event.key==="+" || event.key==="-")) return;
 	switch (event.key) {
 		case " ":
 			getStrInd = ((getStrInd + 1) % getStrings.length);
 			break;
 		case "c":
-			light = !light;
+			schemes.index = ((schemes.index + 1) % schemes.colors.length + schemes.colors.length) % schemes.colors.length;
+			color = schemes.colors[schemes.index];
 			setColors();
+			setColorsToInput();
+			break;
+		case "C":
+			schemes.index = ((schemes.index - 1) % schemes.colors.length + schemes.colors.length) % schemes.colors.length;
+			color = schemes.colors[schemes.index];
+			setColors();
+			setColorsToInput();
 			break;
 		case "+":
-			fontSizePx *= bigFontSizeFactor;
+			fontSizePx *= fontSizeFactor;
 			setSize();
 			break;
 		case "-":
-			fontSizePx /= bigFontSizeFactor;
+			fontSizePx /= fontSizeFactor;
 			setSize();
 			break;
 		case "0":
@@ -73,6 +103,9 @@ function keyPress(event) {
 			break;
 		case "h":
 			toggleHelp();
+			break;
+		case "s":
+			toggleSettings();
 			break;
 	}
 }
@@ -85,10 +118,44 @@ function toggleHelp() {
 	}
 }
 
+function toggleSettings() {
+	settings = !settings;
+	document.getElementById("time-container").style.display = settings ? "none" : "block";
+	document.getElementById("settings-container").style.display = settings ? "block" : "none";
+}
+
+function setColorsToInput() {
+	document.getElementById("text-color").value = color.text.match(rgbSedecimalRe)[0].toUpperCase();
+	document.getElementById("background-color").value = color.background.match(rgbSedecimalRe)[0].toUpperCase();
+}
+
+function checkConvertion(event) {
+	if (rgbSedecimalRe.test(event.target.value)) convertToRgbSedecimal(event.target);
+}
+
+function convertToRgbSedecimal(element) {
+	element.value = element.value.match(rgbSedecimalRe)[0].toUpperCase();
+	writeColor(element);
+}
+
+function writeColor(element) {
+	color[element.id.split("-")[0]] = "#" + element.value.match(rgbSedecimalRe)[0].toLowerCase();
+	setColors();
+}
+
+function saveColorsToSchemes() {
+	alert("sorry, not supported yet ;)");
+}
 </script>
 <style>
 	body {
 		font-family: monospace;
+	}
+	input {
+		font-family: monospace;
+		font-weight: 600;
+	}
+	#time-container {
 		text-align: center;
 	}
 	.container {
@@ -102,10 +169,18 @@ function toggleHelp() {
 </style>
 </head>
 <body onload="load();">
-<div class="container">
-	<span class="help" style="display:none"><b>Space</b> sweeps through clock-displays | <b>c</b> toggles the colors | <b>+</b> increases size | <b>-</b> decreases size | <b>0</b> resets font size</span>
+<div class="container" id="time-container">
+	<span class="help" style="display:none"><b>Space</b> sweeps through clock-displays | <b>c</b>, <b>shift-c</b> sweeps through the color-schemes | <b>+</b> increases size | <b>-</b> decreases size | <b>0</b> resets font size | <b>s</b> settings</span>
 	<span id="time"></span>
 	<span class="help" style="display:none"><a href="https://github.com/benstadlbauer/time">Repository on GitHub</a></span>
+</div>
+<div class="container" id="settings-container" style="display: none;">
+	<label for="text-color">Text color</label> <input type="text" id="text-color">
+	<label for="background-color" style="margin-top: 3px">Background color</label> <input type="text" id="background-color" style="margin-top: 3px">
+	<button onclick="saveColorsToSchemes();" style="margin-top: 3px" disabled>Save to schemes</button>
+	<p>
+	<span id="time-preview"></span>
+	</p>
 </div>
 </body>
 </html>

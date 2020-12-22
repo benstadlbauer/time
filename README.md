@@ -13,4 +13,4 @@ I wanted to have a fullscreen clock for my dual-screen setup for a longer time. 
 
 There are at least a dozen more features in my head I could implement but this is what I have so far. And I don't know if this will work on your computer (regarding the browser, your keyboard-language etc).
 
-I will try to keep this tiny application updated and I hopefully I fill continue to add more features.
+I will try to keep this tiny application updated and I hopefully I will continue adding more features.
